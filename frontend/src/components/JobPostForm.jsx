@@ -1,15 +1,44 @@
 import { useState } from "react";
-import { Field } from "../ui/Field";
-import { RadioGroup } from "../ui/RadioGroup";
-import { styles } from "../ui/styles";
 
 const STEPS = ["Үндсэн мэдээлэл", "Дэлгэрэнгүй", "Шаардлага", "Нийтлэх"];
 
-const inp = styles.inp;
-const sel = styles.sel;
-const ta = styles.ta;
+const Field = ({ label, required, error, children, hint }) => (
+  <div className="form-field">
+    <label className="form-field__label">
+      {label} {required && <span>*</span>}
+    </label>
+    {children}
+    {hint && <div className="form-field__hint">{hint}</div>}
+    {error && <div className="form-field__error">{error}</div>}
+  </div>
+);
 
-export const JobPostForm = ({ onSubmit }) => {
+const RadioGroup = ({ options, value, onChange }) => (
+  <div className="radio-group">
+    {options.map(o => (
+      <div key={o} className={`radio-group__item ${value === o ? 'radio-group__item--active' : ''}`} onClick={() => onChange(o)}>
+        {o}
+      </div>
+    ))}
+  </div>
+);
+
+export const Sidebar = ({ currentStep }) => (
+  <div className="sidebar">
+    <div className="sidebar__title">Алхамууд</div>
+    {STEPS.map((label, i) => (
+      <div key={i}>
+        <div className={`sidebar__step ${i === currentStep ? 'sidebar__step--active' : ''} ${i < currentStep ? 'sidebar__step--done' : ''}`}>
+          <div className="sidebar__step-icon">{i < currentStep ? "✓" : i + 1}</div>
+          <span className="sidebar__step-label">{label}</span>
+        </div>
+        {i < 3 && <div className={`sidebar__line ${i < currentStep ? 'sidebar__line--done' : ''}`} />}
+      </div>
+    ))}
+  </div>
+);
+
+export const JobPostForm = ({ onSubmit, loading = false }) => {
   const [step, setStep] = useState(0);
   const [draftMsg, setDraftMsg] = useState("");
   const [skills, setSkills] = useState([]);
@@ -20,7 +49,7 @@ export const JobPostForm = ({ onSubmit }) => {
     salFrom: "", salTo: "",
     desc: "", benefit: "", hours: "09:00–18:00", days: "5 өдөр", env: "Оффис",
     edu: "Хамаарахгүй", exp: "Шаардахгүй", gender: "Хамаарахгүй", age: "Хамаарахгүй", extra: "",
-    email: "", plan: "Үнэгүй",
+    email: "", phone: "", plan: "Үнэгүй",
   });
   const [errs, setErrs] = useState({});
 
@@ -54,69 +83,89 @@ export const JobPostForm = ({ onSubmit }) => {
     : "Тохиролцоно";
 
   const card = (children, title, icon) => (
-    <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e8e8e8", padding: "22px 24px", marginBottom: 14 }}>
-      {title && (
-        <div style={{ fontSize: 15, fontWeight: 700, color: "#222", marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #f2f2f2" }}>
-          {icon} {title}
-        </div>
-      )}
+    <div className="form-card">
+      {title && <div className="form-card__title">{icon} {title}</div>}
       {children}
     </div>
   );
 
   const btnRow = (showBack = true) => (
-    <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
-      {showBack && <button onClick={back} style={{ background: "#fff", color: "#555", border: "1.5px solid #dde3f0", borderRadius: 7, padding: "9px 18px", fontSize: 13, cursor: "pointer" }}>← Буцах</button>}
-      <button onClick={draft} style={{ background: "#fff", color: draftMsg ? "#22c55e" : "#1a56db", border: `1.5px solid ${draftMsg ? "#22c55e" : "#1a56db"}`, borderRadius: 7, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>{draftMsg || "Ноороглох"}</button>
+    <div className="form-actions">
+      {showBack && <button className="form-actions__btn-back" onClick={back}>← Буцах</button>}
+      <button className={`form-actions__btn-draft ${draftMsg ? 'form-actions__btn-draft--saved' : ''}`} onClick={draft}>{draftMsg || "Ноороглох"}</button>
       {step < 3
-        ? <button onClick={next} style={{ background: "#1a56db", color: "#fff", border: "none", borderRadius: 7, padding: "9px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Дараах →</button>
-        : <button onClick={() => onSubmit({ ...f, skills })} style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 7, padding: "9px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✓ Нийтлэх</button>
+        ? <button className="form-actions__btn-next" onClick={next}>Дараах →</button>
+        : <button className="form-actions__btn-submit" onClick={() => onSubmit({ 
+          title: f.title,
+          type: f.type,
+          sector: f.sector,
+          location: f.location,
+          deadline: f.deadline,
+          salFrom: f.salFrom ? Number(f.salFrom) : null,
+          salTo: f.salTo ? Number(f.salTo) : null,
+          description: f.desc,
+          benefits: f.benefit,
+          workHours: f.hours,
+          workDays: f.days,
+          workEnvironment: f.env,
+          education: f.edu,
+          experience: f.exp,
+          gender: f.gender,
+          ageRange: f.age,
+          skills: skills,
+          extra: f.extra,
+          contactEmail: f.email,
+          contactPhone: f.phone,
+          plan: f.plan,
+        })} disabled={loading}>
+          {loading ? 'Нийтлэж байна...' : '✓ Нийтлэх'}
+        </button>
       }
     </div>
   );
 
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ background: "#e8eef8", borderRadius: 4, height: 4, marginBottom: 18, overflow: "hidden" }}>
-        <div style={{ height: 4, background: "#1a56db", borderRadius: 4, width: `${(step + 1) * 25}%`, transition: "width .3s" }} />
+      <div className="form-progress">
+        <div className="form-progress__bar" style={{ width: `${(step + 1) * 25}%` }} />
       </div>
 
       {step === 0 && <>
         {card(<>
           <Field label="Ажлын байрны нэр" required error={errs.title}>
-            <input style={{ ...inp, borderColor: errs.title ? "#e53e3e" : "#d0d8f0" }} value={f.title} onChange={e => set("title", e.target.value)} placeholder="Жишээ: Frontend Developer, Нягтлан бодогч..." />
+            <input className="form-field__input" style={{ borderColor: errs.title ? "#e53e3e" : "" }} value={f.title} onChange={e => set("title", e.target.value)} placeholder="Жишээ: Frontend Developer, Нягтлан бодогч..." />
           </Field>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="grid-2">
             <Field label="Ажлын төрөл" required error={errs.type}>
-              <select style={{ ...sel, borderColor: errs.type ? "#e53e3e" : "#d0d8f0" }} value={f.type} onChange={e => set("type", e.target.value)}>
+              <select className="form-field__select" style={{ borderColor: errs.type ? "#e53e3e" : "" }} value={f.type} onChange={e => set("type", e.target.value)}>
                 <option value="">Сонгох...</option>
                 {["Бүтэн цаг","Хагас цаг","Цагийн","Гэрээт","Дадлага","Зайнаас"].map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
             <Field label="Салбар" required error={errs.sector}>
-              <select style={{ ...sel, borderColor: errs.sector ? "#e53e3e" : "#d0d8f0" }} value={f.sector} onChange={e => set("sector", e.target.value)}>
+              <select className="form-field__select" style={{ borderColor: errs.sector ? "#e53e3e" : "" }} value={f.sector} onChange={e => set("sector", e.target.value)}>
                 <option value="">Сонгох...</option>
                 {["IT / Технологи","Санхүү / Нягтлан","Маркетинг","Инженер","Эрүүл мэнд","Боловсрол","Уул уурхай","Бусад"].map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div className="grid-2">
             <Field label="Байршил" required error={errs.location}>
-              <select style={{ ...sel, borderColor: errs.location ? "#e53e3e" : "#d0d8f0" }} value={f.location} onChange={e => set("location", e.target.value)}>
+              <select className="form-field__select" style={{ borderColor: errs.location ? "#e53e3e" : "" }} value={f.location} onChange={e => set("location", e.target.value)}>
                 <option value="">Сонгох...</option>
                 {["Улаанбаатар","Дархан","Эрдэнэт","Зайнаас","Бусад аймаг"].map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
             <Field label="Дуусах огноо" required error={errs.deadline}>
-              <input type="date" style={{ ...inp, borderColor: errs.deadline ? "#e53e3e" : "#d0d8f0" }} value={f.deadline} min={new Date().toISOString().split("T")[0]} onChange={e => set("deadline", e.target.value)} />
+              <input type="date" className="form-field__input" style={{ borderColor: errs.deadline ? "#e53e3e" : "" }} value={f.deadline} min={new Date().toISOString().split("T")[0]} onChange={e => set("deadline", e.target.value)} />
             </Field>
           </div>
           <Field label="Цалин (₮)" hint="Хоосон орхивол 'Тохиролцоно' харагдана">
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input style={{ ...inp, flex: 1 }} type="number" min="0" value={f.salFrom} onChange={e => set("salFrom", e.target.value)} placeholder="800,000" />
-              <span style={{ fontSize: 13, color: "#bbb" }}>—</span>
-              <input style={{ ...inp, flex: 1 }} type="number" min="0" value={f.salTo} onChange={e => set("salTo", e.target.value)} placeholder="2,000,000" />
-              <div style={{ background: "#f5f5f5", border: "1.5px solid #d0d8f0", borderRadius: 7, padding: "9px 10px", fontSize: 13, color: "#555", fontWeight: 600, width: 52, textAlign: "center" }}>₮</div>
+            <div className="salary-input">
+              <input className="form-field__input salary-input__field" type="number" min="0" value={f.salFrom} onChange={e => set("salFrom", e.target.value)} placeholder="800,000" />
+              <span className="salary-input__separator">—</span>
+              <input className="form-field__input salary-input__field" type="number" min="0" value={f.salTo} onChange={e => set("salTo", e.target.value)} placeholder="2,000,000" />
+              <div className="salary-input__currency">₮</div>
             </div>
           </Field>
         </>, "Үндсэн мэдээлэл", "📋")}
@@ -126,19 +175,19 @@ export const JobPostForm = ({ onSubmit }) => {
       {step === 1 && <>
         {card(<>
           <Field label="Тайлбар" required error={errs.desc}>
-            <textarea style={{ ...ta, borderColor: errs.desc ? "#e53e3e" : "#d0d8f0" }} value={f.desc} onChange={e => set("desc", e.target.value)} placeholder="Ажлын байрны үндсэн чиг үүрэг, хариуцах ажлуудаа тайлбарлана уу..." />
-            <div style={{ fontSize: 11, color: "#bbb", textAlign: "right" }}>{f.desc.length}/1000</div>
+            <textarea className="form-field__textarea" style={{ borderColor: errs.desc ? "#e53e3e" : "" }} value={f.desc} onChange={e => set("desc", e.target.value)} placeholder="Ажлын байрны үндсэн чиг үүрэг, хариуцах ажлуудаа тайлбарлана уу..." />
+            <div className="form-field__count">{f.desc.length}/1000</div>
           </Field>
           <Field label="Давуу тал / Урамшуулал">
-            <textarea style={ta} value={f.benefit} onChange={e => set("benefit", e.target.value)} placeholder="Жишээ: Уян хатан цагийн хуваарь, эрүүл мэндийн даатгал..." />
-            <div style={{ fontSize: 11, color: "#bbb", textAlign: "right" }}>{f.benefit.length}/500</div>
+            <textarea className="form-field__textarea" value={f.benefit} onChange={e => set("benefit", e.target.value)} placeholder="Жишээ: Уян хатан цагийн хуваарь, эрүүл мэндийн даатгал..." />
+            <div className="form-field__count">{f.benefit.length}/500</div>
           </Field>
         </>, "Ажлын байрны тайлбар", "📝")}
         {card(<>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-            <Field label="Ажлын цаг"><select style={sel} value={f.hours} onChange={e => set("hours", e.target.value)}>{["09:00–18:00","08:00–17:00","Уян хатан","Ээлжийн"].map(o=><option key={o}>{o}</option>)}</select></Field>
-            <Field label="7 хоногт"><select style={sel} value={f.days} onChange={e => set("days", e.target.value)}>{["5 өдөр","6 өдөр","Уян хатан"].map(o=><option key={o}>{o}</option>)}</select></Field>
-            <Field label="Орчин"><select style={sel} value={f.env} onChange={e => set("env", e.target.value)}>{["Оффис","Зайнаас","Хосолсон"].map(o=><option key={o}>{o}</option>)}</select></Field>
+          <div className="grid-3">
+            <Field label="Ажлын цаг"><select className="form-field__select" value={f.hours} onChange={e => set("hours", e.target.value)}>{["09:00–18:00","08:00–17:00","Уян хатан","Ээлжийн"].map(o=><option key={o}>{o}</option>)}</select></Field>
+            <Field label="7 хоногт"><select className="form-field__select" value={f.days} onChange={e => set("days", e.target.value)}>{["5 өдөр","6 өдөр","Уян хатан"].map(o=><option key={o}>{o}</option>)}</select></Field>
+            <Field label="Орчин"><select className="form-field__select" value={f.env} onChange={e => set("env", e.target.value)}>{["Оффис","Зайнаас","Хосолсон"].map(o=><option key={o}>{o}</option>)}</select></Field>
           </div>
         </>, "Ажлын нөхцөл", "🏢")}
         {btnRow()}
@@ -146,41 +195,39 @@ export const JobPostForm = ({ onSubmit }) => {
 
       {step === 2 && <>
         {card(<>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <Field label="Боловсрол"><select style={sel} value={f.edu} onChange={e => set("edu", e.target.value)}>{["Хамаарахгүй","Дунд боловсрол","Техникийн","Бакалавр","Магистр","Доктор"].map(o=><option key={o}>{o}</option>)}</select></Field>
-            <Field label="Туршлага"><select style={sel} value={f.exp} onChange={e => set("exp", e.target.value)}>{["Шаардахгүй","1 жилээс дээш","2 жилээс дээш","3 жилээс дээш","5 жилээс дээш"].map(o=><option key={o}>{o}</option>)}</select></Field>
+          <div className="grid-2">
+            <Field label="Боловсрол"><select className="form-field__select" value={f.edu} onChange={e => set("edu", e.target.value)}>{["Хамаарахгүй","Дунд боловсрол","Техникийн","Бакалавр","Магистр","Доктор"].map(o=><option key={o}>{o}</option>)}</select></Field>
+            <Field label="Туршлага"><select className="form-field__select" value={f.exp} onChange={e => set("exp", e.target.value)}>{["Шаардахгүй","1 жилээс дээш","2 жилээс дээш","3 жилээс дээш","5 жилээс дээш"].map(o=><option key={o}>{o}</option>)}</select></Field>
           </div>
           <Field label="Хүйс"><RadioGroup options={["Хамаарахгүй","Эрэгтэй","Эмэгтэй"]} value={f.gender} onChange={v => set("gender", v)} /></Field>
           <Field label="Насны хязгаар"><RadioGroup options={["Хамаарахгүй","18–25","25–35","35–45","45+"]} value={f.age} onChange={v => set("age", v)} /></Field>
           <Field label="Ур чадвар">
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+            <div className="skills">
               {skills.map((s, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, background: "#eef3ff", border: "1px solid #c7d7fa", borderRadius: 20, padding: "4px 11px", fontSize: 12, color: "#1a56db", fontWeight: 500 }}>
+                <div key={i} className="skill-tag">
                   {s}
-                  <button onClick={() => setSkills(p => p.filter((_, j) => j !== i))} style={{ background: "none", border: "none", cursor: "pointer", color: "#1a56db", fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
+                  <button className="skill-tag__remove" onClick={() => setSkills(p => p.filter((_, j) => j !== i))}>×</button>
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 7 }}>
-              <input style={{ ...inp, flex: 1 }} value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addSkill()} placeholder="React, Python, Excel... оруулж Enter дарна" />
-              <button onClick={addSkill} style={{ background: "#1a56db", color: "#fff", border: "none", borderRadius: 7, padding: "9px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>+ Нэмэх</button>
+            <div className="flex gap-7">
+              <input className="form-field__input" style={{ flex: 1 }} value={skillInput} onChange={e => setSkillInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addSkill()} placeholder="React, Python, Excel... оруулж Enter дарна" />
+              <button className="btn btn--primary" style={{ padding: "9px 14px", fontSize: 12, whiteSpace: "nowrap" }} onClick={addSkill}>+ Нэмэх</button>
             </div>
           </Field>
           <Field label="Нэмэлт шаардлага">
-            <textarea style={ta} value={f.extra} onChange={e => set("extra", e.target.value)} placeholder="Жишээ: Унаатай байх, гадаад хэл мэдэх..." />
+            <textarea className="form-field__textarea" value={f.extra} onChange={e => set("extra", e.target.value)} placeholder="Жишээ: Унаатай байх, гадаад хэл мэдэх..." />
           </Field>
         </>, "Шаардлага", "🎯")}
         {btnRow()}
       </>}
 
       {step === 3 && <>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fff8e1", border: "1px solid #ffc107", borderRadius: 7, padding: "7px 13px", fontSize: 12, color: "#856404", marginBottom: 14 }}>
-          👁 Нийтлэхээс өмнө шалгана уу
-        </div>
+        <div className="warning-box">👁 Нийтлэхээс өмнө шалгана уу</div>
         {card(<>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: "#1a56db" }}>{f.title}</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 7 }}>
+            <div className="flex flex-wrap" style={{ gap: 5, marginTop: 7 }}>
               {[f.type, f.sector, `📍 ${f.location}`, f.deadline ? `📅 ${f.deadline} хүртэл` : ""].filter(Boolean).map(t => (
                 <span key={t} style={{ background: "#eef3ff", borderRadius: 20, padding: "2px 10px", fontSize: 11, color: "#1a56db" }}>{t}</span>
               ))}
@@ -194,7 +241,10 @@ export const JobPostForm = ({ onSubmit }) => {
         </>, "Урьдчилан харах", "🔍")}
         {card(<>
           <Field label="Өргөдөл хүлээн авах имэйл">
-            <input style={inp} type="email" value={f.email} onChange={e => set("email", e.target.value)} placeholder="hr@company.mn" />
+            <input className="form-field__input" type="email" value={f.email} onChange={e => set("email", e.target.value)} placeholder="hr@company.mn" />
+          </Field>
+          <Field label="Холбогдох утас">
+            <input className="form-field__input" type="tel" value={f.phone} onChange={e => set("phone", e.target.value)} placeholder="+976 9911 2233" />
           </Field>
           <Field label="Нийтлэлийн төрөл">
             <RadioGroup options={["Үнэгүй","Стандарт (₮49,000)","Алтан (₮99,000)"]} value={f.plan} onChange={v => set("plan", v)} />
