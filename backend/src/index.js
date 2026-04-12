@@ -3,6 +3,8 @@ import cors from 'cors'
 import { connectDB } from './config/db.js'
 import authRoutes from './routes/auth.js'
 import profileRoutes from './routes/profile.js'
+import applicationRoutes from './routes/application.js'
+import seekerRoutes from './routes/seeker.js'
 import { fileURLToPath } from 'url'
 import path from 'path'
 
@@ -20,6 +22,8 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
+app.use('/api/applications', applicationRoutes)
+app.use('/api/seeker', seekerRoutes)
 
 app.get('/api/health', async (req, res) => {
   res.json({ status: 'ok', message: 'Zangia API is running', database: 'MongoDB' })

@@ -9,6 +9,8 @@ import ProfilePage from './pages/ProfilePage'
 import JobDetailPage from './pages/JobDetailPage'
 import CompanyDetailPage from './pages/CompanyDetailPage'
 import CompaniesPage from './pages/CompaniesPage'
+import ApplicationsPage from './pages/ApplicationsPage'
+import SeekerProfilePage from './pages/SeekerProfilePage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
 function ProtectedRoute({ children }) {
@@ -32,6 +34,8 @@ export default function App() {
             <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="job-post" element={<ProtectedRoute><JobPostPage /></ProtectedRoute>} />
             <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="applications" element={<ProtectedRoute><ApplicationsPage /></ProtectedRoute>} />
+            <Route path="my-profile" element={<ProtectedRoute><SeekerProfilePage /></ProtectedRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

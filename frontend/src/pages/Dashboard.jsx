@@ -13,11 +13,16 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get jobs from backend
-        const jobsRes = await api.request('/api/jobs', { method: 'GET' })
+        const jobsRes = await api.getMyJobs()
         const userJobs = jobsRes.jobs || []
         setJobs(userJobs)
-        setStats(s => ({ ...s, posts: userJobs.length }))
+        
+        let appCount = 0
+        for (const job of userJobs) {
+          const apps = await api.getJobApplications(job._id)
+          appCount += (apps.applications?.length || 0)
+        }
+        setStats(s => ({ ...s, posts: userJobs.length, applications: appCount }))
       } catch (error) {
         console.log('No jobs yet')
       } finally {
@@ -74,12 +79,12 @@ export default function Dashboard() {
       ) : (
         <div className="dashboard__applicants">
           {jobs.map((job, i) => (
-            <div key={i} className="applicant-item">
+            <div key={i} className="applicant-item" onClick={() => navigate(`/job/${job._id}`)} style={{ cursor: 'pointer' }}>
               <div>
                 <div className="applicant-item__name">{job.title}</div>
                 <div className="applicant-item__meta">{job.sector} · {job.location}</div>
               </div>
-              <span className="badge badge--new">{job.status || 'pending'}</span>
+              <span className="badge badge--new">{new Date(job.createdAt).toLocaleDateString('mn-MN')}</span>
             </div>
           ))}
         </div>

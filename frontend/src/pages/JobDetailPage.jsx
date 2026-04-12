@@ -18,7 +18,7 @@ export default function JobDetailPage() {
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)
   const [applyMode, setApplyMode] = useState(false)
-  const [appData, setAppData] = useState({ name: '', email: '', phone: '', cv: null })
+  const [appData, setAppData] = useState({ cv: null })
   const [sending, setSending] = useState(false)
 
   useEffect(() => {
@@ -38,20 +38,30 @@ export default function JobDetailPage() {
   }
 
   const handleFileChange = (e) => {
-    setAppData(p => ({ ...p, cv: e.target.files[0] }))
+    const file = e.target.files[0]
+    if (file && file.type !== 'application/pdf') {
+      alert('Зөвхөн PDF файл оруулна уу')
+      return
+    }
+    setAppData(p => ({ ...p, cv: file }))
   }
 
   const handleApply = async () => {
-    if (!appData.name || !appData.email) {
-      alert('Нэр болон имэйл оруулна уу')
+    if (!appData.cv) {
+      alert('CV файл сонгоно уу')
       return
     }
     setSending(true)
-    setTimeout(() => {
+    try {
+      await api.applyToJob(id, {}, appData.cv)
       alert('Өргөдөл амжилттай илгээгдлээ!')
       setApplyMode(false)
+      setAppData({ cv: null })
+    } catch (error) {
+      alert(error.message)
+    } finally {
       setSending(false)
-    }, 1000)
+    }
   }
 
   if (loading) {
@@ -107,24 +117,13 @@ export default function JobDetailPage() {
         <div className="job-detail__apply">
           <h3>Өргөдөл илгээх</h3>
           <div className="form-field">
-            <label className="form-field__label">Нэр <span>*</span></label>
-            <input className="form-field__input" value={appData.name} onChange={e => setAppData(p => ({ ...p, name: e.target.value }))} placeholder="Таны нэр" />
-          </div>
-          <div className="form-field">
-            <label className="form-field__label">Имэйл <span>*</span></label>
-            <input className="form-field__input" type="email" value={appData.email} onChange={e => setAppData(p => ({ ...p, email: e.target.value }))} placeholder="Таны имэйл" />
-          </div>
-          <div className="form-field">
-            <label className="form-field__label">Утас</label>
-            <input className="form-field__input" value={appData.phone} onChange={e => setAppData(p => ({ ...p, phone: e.target.value }))} placeholder="+976" />
-          </div>
-          <div className="form-field">
-            <label className="form-field__label">CV файл</label>
-            <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} className="form-field__input" />
+            <label className="form-field__label">CV файл (PDF) <span>*</span></label>
+            <input type="file" accept=".pdf" onChange={handleFileChange} className="form-field__input" />
+            {appData.cv && <div style={{ fontSize: 12, color: '#22c55e', marginTop: 4 }}>✓ Сонгосон: {appData.cv.name}</div>}
           </div>
           <div className="form-actions">
             <button className="btn btn--outline" onClick={() => setApplyMode(false)}>Буцах</button>
-            <button className="btn btn--primary" onClick={handleApply} disabled={sending}>
+            <button className="btn btn--primary" onClick={handleApply} disabled={sending || !appData.cv}>
               {sending ? 'Илгээж байна...' : 'Илгээх'}
             </button>
           </div>

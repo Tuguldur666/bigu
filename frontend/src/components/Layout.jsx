@@ -24,9 +24,14 @@ export default function Layout() {
         <div className="navbar__links">
           <span className={`navbar__link ${isActive('/') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/')}>Ажлын зар</span>
           <span className={`navbar__link ${isActive('/companies') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/companies')}>Компани</span>
-          <span className="navbar__link">GWA</span>
           {user?.type === 'employer' && (
-            <span className={`navbar__link ${isActive('/profile') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/profile')}>Профайл</span>
+            <>
+              <span className={`navbar__link ${isActive('/profile') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/profile')}>Профайл</span>
+              <span className={`navbar__link ${isActive('/applications') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/applications')}>Өргөдөл</span>
+            </>
+          )}
+          {user?.type === 'seeker' && (
+            <span className={`navbar__link ${isActive('/my-profile') ? 'navbar__link--active' : ''}`} onClick={() => navigate('/my-profile')}>Миний профайл</span>
           )}
         </div>
         <div className="navbar__right">
