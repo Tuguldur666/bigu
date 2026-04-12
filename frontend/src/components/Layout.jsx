@@ -15,10 +15,10 @@ export default function Layout() {
     <div className="app">
       <div className="navbar">
         <div className="navbar__logo" onClick={() => navigate('/')}>
-          <div className="navbar__logo-img"><span>Z</span></div>
+          <div className="navbar__logo-img"><span>BIGU</span></div>
           <div className="navbar__logo-text">
-            <span className="navbar__logo-name">zangia.mn</span>
-            <span className="navbar__logo-tagline">МОНГОЛЫН ИРГЭН БҮРД АЖЛЫН БАЙР!</span>
+            <span className="navbar__logo-name">BIGU.MN</span>
+            <span className="navbar__logo-tagline">МОНГОЛЫН АЖЛЫН ПОРТАЛ</span>
           </div>
         </div>
         <div className="navbar__links">
