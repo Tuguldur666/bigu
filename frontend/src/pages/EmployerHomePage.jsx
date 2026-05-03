@@ -129,7 +129,7 @@ const Modal = ({ show, onClose, activeTab, onTabChange, onLogin, onRegister, onS
             </div>
             <div style={styles.leftStat}>{leftStat}</div>
             <div style={{ fontSize: 15, color: "rgba(255,255,255,0.9)", marginBottom: 4 }}>{leftLabel}</div>
-            <div style={styles.leftText}>Zangia.mn-д бүртгэлгүй юу?</div>
+            <div style={styles.leftText}>Bigu.mn-д бүртгэлгүй юу?</div>
             <button style={styles.btnRegister} onClick={() => { setSection("register"); setRegStep(1); }}>
               {section === "login" ? "Бүртгүүлэх" : "Нэвтрэх"}
             </button>

@@ -91,7 +91,7 @@ export default function LoginPage() {
             </div>
             <div className="modal__stat">{leftStat}</div>
             <div className="modal__stat-label">{leftLabel}</div>
-            <div className="modal__text">Zangia.mn-д бүртгэлгүй юу?</div>
+            <div className="modal__text">Bigu.mn-д бүртгэлгүй юу?</div>
             <button className="btn btn--primary" style={{ width: '100%' }} onClick={() => { setSection(section === "login" ? "register" : "login"); setRegStep(1); setError(""); }}>
               {section === "login" ? "Бүртгүүлэх" : "Нэвтрэх"}
             </button>
