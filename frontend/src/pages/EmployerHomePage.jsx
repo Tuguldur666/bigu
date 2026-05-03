@@ -79,7 +79,7 @@ const Navbar = ({ user, onLogin, onLogout, onShowHome }) => (
     <div style={styles.logo} onClick={onShowHome}>
       <div style={styles.logoImg}><span style={{ color: "#fff", fontWeight: 700, fontSize: 13 }}>Z</span></div>
       <div style={styles.logoText}>
-        <span style={styles.logoName}>zangia.mn</span>
+        <span style={styles.logoName}>Bigu.mn</span>
         <span style={styles.logoTagline}>МОНГОЛЫН ИРГЭН БҮРД АЖЛЫН БАЙР!</span>
       </div>
     </div>
