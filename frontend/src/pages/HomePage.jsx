@@ -33,6 +33,7 @@ export default function HomePage() {
     salaryMax: ''
   })
   const [showFilters, setShowFilters] = useState(false)
+  const [sortBy, setSortBy] = useState('')
 
   useEffect(() => {
     loadData()
@@ -61,7 +62,7 @@ export default function HomePage() {
   }
 
   const filteredJobs = useMemo(() => {
-    return jobs.filter(job => {
+    let result = jobs.filter(job => {
       if (search && !job.title.toLowerCase().includes(search.toLowerCase()) && 
           !job.description?.toLowerCase().includes(search.toLowerCase())) {
         return false
@@ -73,7 +74,19 @@ export default function HomePage() {
       if (filters.salaryMax && (!job.salTo || job.salTo > Number(filters.salaryMax))) return false
       return true
     })
-  }, [jobs, search, filters])
+
+    if (sortBy === 'salary-desc') {
+      result.sort((a, b) => (b.salTo || b.salFrom || 0) - (a.salTo || a.salFrom || 0))
+    } else if (sortBy === 'salary-asc') {
+      result.sort((a, b) => (a.salFrom || a.salTo || 0) - (b.salFrom || b.salTo || 0))
+    } else if (sortBy === 'date-desc') {
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    } else if (sortBy === 'date-asc') {
+      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    }
+
+    return result
+  }, [jobs, search, filters, sortBy])
 
   const clearFilters = () => {
     setFilters({
@@ -196,11 +209,13 @@ export default function HomePage() {
       <div className="section">
         <div className="section__header">
           <div className="section__title">Ажлын зар ({filteredJobs.length})</div>
-          {activeFilterCount > 0 && (
-            <div style={{ fontSize: 13, color: '#666' }}>
-              {search && `"${search}"`} {filteredJobs.length} / {jobs.length} зар
-            </div>
-          )}
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ fontSize: 13, padding: '6px 12px', borderRadius: 6, border: '1px solid #ddd' }}>
+            <option value="">Оноогоор эрэмблэх</option>
+            <option value="salary-desc">Цалин өндөр →</option>
+            <option value="salary-asc">Цалин бага →</option>
+            <option value="date-desc">Шинэ → Хуучин</option>
+            <option value="date-asc">Хуучин → Шинэ</option>
+          </select>
         </div>
         <div className="job-list">
           {filteredJobs.length === 0 ? (
