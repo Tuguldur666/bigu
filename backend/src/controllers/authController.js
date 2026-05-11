@@ -27,9 +27,7 @@ export const registerSeeker = async (req, res) => {
       phone,
       email,
       password: hashedPassword,
-      type: 'seeker',
-      profession: req.body.profession || null,
-      experience: req.body.experience || null
+      type: 'seeker'
     })
 
     await user.save()
